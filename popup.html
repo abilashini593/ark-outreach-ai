@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ark Abroad — LinkedIn Outreach AI</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="app">
+
+    <header class="app-header">
+      <div class="header-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+          <path d="M2 8H22" stroke="currentColor" stroke-width="2"/>
+          <path d="M6 14H10M14 14H18M6 17H8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="app-title-wrap">
+        <h1 class="app-title">Ark Outreach AI</h1>
+        <span class="app-subtitle">Corporate Networking</span>
+      </div>
+      <div class="key-status" id="key-status">● Free Mode</div>
+    </header>
+
+    <nav class="tab-nav">
+      <button class="tab-btn active" data-tab="current">CURRENT</button>
+      <button class="tab-btn" data-tab="recent">RECENT (<span id="recent-count">0</span>)</button>
+      <button class="tab-btn" data-tab="settings">SETTINGS</button>
+    </nav>
+
+    <!-- ── CURRENT tab ── -->
+    <section class="tab-content active" id="tab-current">
+
+      <div class="alert alert-info hidden" id="page-warning">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Navigate to a LinkedIn profile (e.g. linkedin.com/in/name) to generate outreach.
+      </div>
+
+      <div class="profile-card hidden" id="profile-section">
+        <div class="profile-avatar" id="profile-avatar">?</div>
+        <div class="profile-details">
+          <div class="profile-name" id="profile-name"></div>
+          <div class="profile-headline" id="profile-headline"></div>
+          <div class="profile-meta-row">
+            <span class="profile-company" id="profile-company"></span>
+            <span class="profile-location" id="profile-location"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls: Message Type, Tone, & Format Limit -->
+      <div class="controls-row">
+        <div class="field-group">
+          <label class="field-label" for="message-type">Goal</label>
+          <div class="select-wrapper">
+            <select id="message-type" class="field-select">
+              <option value="Networking" selected>☕ 15-min Coffee Chat</option>
+              <option value="Job">💼 Job Opening Inquiry</option>
+              <option value="Referral">🤝 Referral Guidance</option>
+              <option value="Collaboration">💡 Mutual Exchange</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" for="tone">Tone</label>
+          <div class="select-wrapper">
+            <select id="tone" class="field-select">
+              <option value="Neutral" selected>Warm &amp; Professional</option>
+              <option value="Casual">Conversational / Peer</option>
+              <option value="Formal">Executive / Formal</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Format selector: Connection note (<300 chars) vs InMail -->
+      <div class="format-bar">
+        <label class="format-label">Format:</label>
+        <div class="format-toggle">
+          <button type="button" class="format-btn active" id="format-note" data-format="connection_note">
+            🤝 Connection Note (&lt;300 ch)
+          </button>
+          <button type="button" class="format-btn" id="format-full" data-format="full">
+            💬 InMail / Message
+          </button>
+        </div>
+      </div>
+
+      <!-- Mode toggle -->
+      <div class="mode-toggle">
+        <button type="button" class="mode-btn active" id="mode-simple">⚡ Quick Generate</button>
+        <button type="button" class="mode-btn" id="mode-deep">🔍 Deep Mode (3-Layer Pipeline)</button>
+      </div>
+
+      <!-- Simple Mode UI -->
+      <div id="simple-mode-ui">
+        <button id="scrape-btn" class="btn btn-primary btn-full">
+          <span id="btn-label">Scrape Profile &amp; Generate</span>
+          <span id="btn-spinner" class="spinner hidden"></span>
+        </button>
+      </div>
+
+      <!-- Deep Mode UI -->
+      <div id="deep-mode-ui" class="hidden">
+        <div class="pipeline-panel">
+          <div class="pipeline-header">3-Layer Corporate Outreach Pipeline</div>
+          
+          <div class="layer-row">
+            <div class="layer-badge l1">L1</div>
+            <div class="layer-info">
+              <div class="layer-title">Profile &amp; Seniority Intelligence</div>
+              <div class="layer-desc" id="l1-desc">Maps career trajectory, seniority level &amp; domain context</div>
+            </div>
+            <div class="layer-status-wrap">
+              <div class="status-dot" id="l1-dot"></div>
+              <span class="layer-status-text" id="l1-text">Ready</span>
+            </div>
+          </div>
+
+          <div class="layer-row">
+            <div class="layer-badge l2">L2</div>
+            <div class="layer-info">
+              <div class="layer-title">Strategic Angle &amp; Hook Synthesis</div>
+              <div class="layer-desc" id="l2-desc">Extracts conversation starters, common ground &amp; company momentum</div>
+            </div>
+            <div class="layer-status-wrap">
+              <div class="status-dot" id="l2-dot"></div>
+              <span class="layer-status-text" id="l2-text">Ready</span>
+            </div>
+          </div>
+
+          <div class="layer-row">
+            <div class="layer-badge l3">L3</div>
+            <div class="layer-info">
+              <div class="layer-title">Personalized Message Writer</div>
+              <div class="layer-desc">Synthesizes candidate background &amp; character limit</div>
+            </div>
+            <div class="layer-status-wrap">
+              <div class="status-dot" id="l3-dot"></div>
+              <span class="layer-status-text" id="l3-text">Waiting</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hooks-panel hidden" id="hooks-panel">
+          <div class="hooks-header">
+            <span class="hooks-label">⚡ Strategic Angles Found (Click to prioritize)</span>
+          </div>
+          <div id="hooks-list"></div>
+        </div>
+
+        <button id="enrich-btn" class="btn btn-primary btn-full">
+          <span id="enrich-label">Scrape + Synthesize Hooks (L1 + L2)</span>
+          <span id="enrich-spinner" class="spinner hidden"></span>
+        </button>
+        <button id="deep-generate-btn" class="btn btn-secondary btn-full" disabled>
+          <span id="deep-gen-label">Generate Outreach Message (L3)</span>
+          <span id="deep-gen-spinner" class="spinner hidden"></span>
+        </button>
+      </div>
+
+      <div class="status-bar hidden" id="status-message"></div>
+
+      <!-- Generated Message Area -->
+      <div class="message-area hidden" id="message-section">
+        <div class="message-area-header">
+          <span class="message-area-label">Outreach Message</span>
+          <div class="char-count-wrap">
+            <span class="char-count" id="char-count">0 chars</span>
+            <span class="char-limit-badge" id="char-limit-badge">✓ Under 300</span>
+          </div>
+        </div>
+        <textarea id="generated-message" class="message-textarea" rows="7" spellcheck="true"></textarea>
+        
+        <div class="action-row">
+          <button id="regenerate-btn" class="btn btn-secondary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M1 4v6h6M23 20v-6h-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10M23 14l-4.64 4.36A9 9 0 0 1 3.51 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Regenerate
+          </button>
+          <button id="auto-trim-btn" class="btn btn-warning hidden">
+            ✂ Trim to 300
+          </button>
+          <button id="copy-btn" class="btn btn-primary">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" stroke="currentColor" stroke-width="2"/></svg>
+            Copy
+          </button>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ── RECENT tab ── -->
+    <section class="tab-content" id="tab-recent">
+      <div class="recent-toolbar">
+        <input type="text" id="recent-search" class="recent-search-input" placeholder="🔍 Search contacts or companies…" />
+        <div class="recent-toolbar-actions">
+          <button class="btn btn-sm btn-secondary" id="export-csv-btn" title="Export to CSV for spreadsheet tracking">
+            📊 Export CSV
+          </button>
+          <button class="btn-ghost" id="clear-recent-btn">Clear</button>
+        </div>
+      </div>
+      
+      <div id="recent-list"></div>
+      
+      <div class="empty-state" id="no-recent">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <p><strong>No saved contacts yet.</strong></p>
+        <p class="empty-hint">Generate outreach messages on LinkedIn profiles to track your networking pipeline here.</p>
+      </div>
+    </section>
+
+    <!-- ── SETTINGS tab ── -->
+    <section class="tab-content" id="tab-settings">
+      <div class="settings-form">
+
+        <!-- AI Provider Selection -->
+        <div class="settings-card">
+          <div class="settings-card-title">🤖 AI Engine &amp; API Key</div>
+          <div class="settings-card-desc">Choose your preferred provider. Free Mode uses smart built-in corporate templates with zero setup.</div>
+
+          <div class="field-group full" style="margin-top: 8px;">
+            <label class="field-label" for="ai-provider">AI Provider</label>
+            <div class="select-wrapper">
+              <select id="ai-provider" class="field-select">
+                <option value="local">🆓 Smart Free Engine (No API Key Required)</option>
+                <option value="gemini" selected>♊ Google Gemini (Free Tier Available)</option>
+                <option value="openai">🟢 OpenAI (GPT-4o-mini)</option>
+                <option value="anthropic">🟣 Anthropic Claude (Claude 3.5 Haiku)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="license-key-input-wrap" id="api-key-wrap" style="margin-top: 8px;">
+            <input id="api-key" type="password" class="license-key-input"
+              placeholder="Paste API Key here…" autocomplete="off" spellcheck="false" />
+            <button class="validate-btn" id="validate-btn">Test Key</button>
+          </div>
+          <div class="key-validation-status hidden" id="key-validation-status"></div>
+          <div class="field-hint" id="provider-hint">Gemini offers generous free API tier for students and personal development.</div>
+        </div>
+
+        <!-- Candidate Career Positioning (Ark Abroad alignment) -->
+        <div class="settings-card">
+          <div class="settings-card-title">🎯 Candidate Positioning (You)</div>
+          <div class="settings-card-desc">Personalize your outreach so messages reflect your unique background, target role, and location.</div>
+
+          <div class="field-group full" style="margin-top: 8px;">
+            <label class="field-label" for="user-name">Your Full Name</label>
+            <input id="user-name" type="text" class="field-input" placeholder="e.g. Jane Smith" autocomplete="off" />
+          </div>
+
+          <div class="field-group full" style="margin-top: 8px;">
+            <label class="field-label" for="target-role">Your Target Role &amp; Location</label>
+            <input id="target-role" type="text" class="field-input" placeholder="e.g. Software Engineer in Sydney" autocomplete="off" />
+          </div>
+
+          <div class="field-group full" style="margin-top: 8px;">
+            <label class="field-label" for="user-bio">Your Professional Summary / Transition Story</label>
+            <textarea id="user-bio" class="field-textarea" rows="3"
+              placeholder="e.g. International Master's graduate in Tech with 2 years full-stack experience, passionate about scalable cloud systems."></textarea>
+          </div>
+
+          <div class="field-group full" style="margin-top: 8px;">
+            <label class="field-label">Your Resume (PDF or Summary)</label>
+            <div class="file-upload-area" id="file-upload-area">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 2v6h6M12 18v-6M9 15l3-3 3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span id="file-label">Click to upload or drag PDF resume</span>
+              <input id="resume-upload" type="file" accept=".pdf" class="file-input" />
+            </div>
+            <div class="resume-status hidden" id="resume-status"></div>
+          </div>
+        </div>
+
+        <button id="save-settings-btn" class="btn btn-primary btn-full">Save Settings</button>
+        <div class="status-bar hidden" id="settings-status"></div>
+
+        <div class="settings-note">
+          🔒 Ark Abroad Privacy: All data and keys are stored 100% locally in your browser storage. No data is sent to external third parties.
+        </div>
+
+      </div>
+    </section>
+
+  </div>
+
+  <script src="utils/cache.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

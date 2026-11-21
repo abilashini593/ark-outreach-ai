@@ -1,0 +1,20 @@
+# OS & Editor files
+.DS_Store
+Thumbs.db
+.vscode/
+*.swp
+*.swo
+
+# Node / Build artifacts (if any)
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+*.log
+
+# Local secrets / environment files
+.env
+.env.*
+*.pem
+*.key
